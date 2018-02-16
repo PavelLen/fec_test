@@ -1,0 +1,3 @@
+fec_homepage:
+    path:     /
+    defaults: { _controller: FecBundle:Pages:index }
