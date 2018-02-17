@@ -1,0 +1,4 @@
+parameters:
+
+    # Default path for upload files
+    upload_directory: '%kernel.root_dir%/../uploads/csv'

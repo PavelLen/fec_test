@@ -1,4 +1,17 @@
 {% extends "@Fec/layout.html.twig" %}
 {% block body %}
-Hello World!
+    <div class="container">
+        <div class="row">
+            {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <input type="submit" value="Upload" />
+            {{ form_end(form) }}
+
+            {#<form name="uploadcsv" method="post" enctype="multipart/form-data">
+                <p>Выберите дату от: <input id="from" type="date" name="calendar">
+                <p>Выберите дату до: <input id="to" type="date" name="calendar">
+                <input id="uploadcsv" accept=".csv" type="FILE" name="uploadcsv" id="uploadfile">
+            </form>#}
+        </div>
+    </div>
 {% endblock %}

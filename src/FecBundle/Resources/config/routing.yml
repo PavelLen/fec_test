@@ -1,3 +1,11 @@
 fec_homepage:
     path:     /
     defaults: { _controller: FecBundle:Pages:index }
+
+fec_table:
+    path:     /table
+    defaults: { _controller: FecBundle:Pages:table }
+
+fec_about:
+    path:     /about
+    defaults: { _controller: FecBundle:Pages:about }
