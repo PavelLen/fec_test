@@ -3,19 +3,39 @@
 namespace FecBundle\Controller;
 
 use FecBundle\Entity\Document;
-use FecBundle\Form\CostsType;
-use FecBundle\Form\TransactionsType;
-use FecBundle\Form\UploadType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
 class PagesController extends Controller
 {
-    public function indexAction(Request $request)
+    /**
+     * @Template()
+     */
+    public function uploadAction(Request $request)
     {
-        var_dump($request->files->all());
-        return $this->render('@Fec/Pages/index.html.twig');
+        $document = new Document();
+        $form = $this->createFormBuilder($document)
+            ->add('file')
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+
+            $em = $this->getDoctrine()->getManager();
+
+            $document->upload();
+
+            $em->persist($document);
+            $em->flush();
+
+            return $this->redirectToRoute('fec_upload');
+        }
+
+        return $this->render('@Fec/Pages/upload.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     public function tableAction()
@@ -26,28 +46,5 @@ class PagesController extends Controller
     public function aboutAction()
     {
         return $this->render('@Fec/Pages/about.html.twig');
-    }
-
-    /**
-     * @Template()
-     */
-    public function uploadAction()
-    {
-        $document = new Document();
-        $form = $this->createFormBuilder($document)
-            ->add('name')
-            ->add('file')
-            ->getForm()
-        ;
-        if ($form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-
-            $em->persist($document);
-            $em->flush();
-
-            return $this->redirect($this->generateUrl());
-        }
-
-        return array('form' => $form->createView());
     }
 }

@@ -1,6 +1,6 @@
-fec_homepage:
+fec_upload:
     path:     /
-    defaults: { _controller: FecBundle:Pages:index }
+    defaults: { _controller: FecBundle:Pages:upload }
 
 fec_table:
     path:     /table
