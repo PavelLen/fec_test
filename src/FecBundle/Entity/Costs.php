@@ -44,7 +44,7 @@ class Costs
     private $costsEntry;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Transactions", mappedBy="costsEntry")
+     * @ORM\OneToMany(targetEntity="FecBundle\Entity\Transaction", mappedBy="costsEntry")
      */
     private $transactions;
 

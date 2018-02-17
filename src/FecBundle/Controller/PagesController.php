@@ -14,12 +14,8 @@ class PagesController extends Controller
 {
     public function indexAction(Request $request)
     {
-        $form = $this->createForm(TransactionsType::class);
-        $form->handleRequest($request);
-
-        return $this->render('@Fec/Pages/index.html.twig', [
-            'form' =>  $form->createView(),
-        ]);
+        var_dump($request->files->all());
+        return $this->render('@Fec/Pages/index.html.twig');
     }
 
     public function tableAction()

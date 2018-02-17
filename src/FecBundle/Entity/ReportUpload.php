@@ -5,14 +5,13 @@ namespace FecBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-
 /**
- * Document
+ * ReportUpload
  *
- * @ORM\Table(name="document")
- * @ORM\Entity(repositoryClass="FecBundle\Repository\DocumentRepository")
+ * @ORM\Table(name="report_upload")
+ * @ORM\Entity(repositoryClass="FecBundle\Repository\ReportUploadRepository")
  */
-class Document
+class ReportUpload
 {
     /**
      * @var int
@@ -22,16 +21,6 @@ class Document
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    public $path;
-
-    /**
-     * @Assert\File(maxSize="6000000")
-     */
-    private $file;
 
 
     /**
@@ -43,6 +32,17 @@ class Document
     {
         return $this->id;
     }
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
+     */
+    public $name;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    public $path;
 
     public function getAbsolutePath()
     {
@@ -69,26 +69,6 @@ class Document
     {
         // get rid of the __DIR__ so it doesn't screw up
         // when displaying uploaded doc/image in the view.
-        return 'uploads/csv';
-    }
-
-    /**
-     * Sets file.
-     *
-     * @param UploadedFile $file
-     */
-    public function setFile(UploadedFile $file = null)
-    {
-        $this->file = $file;
-    }
-
-    /**
-     * Get file.
-     *
-     * @return UploadedFile
-     */
-    public function getFile()
-    {
-        return $this->file;
+        return 'uploads/reports';
     }
 }
