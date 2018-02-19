@@ -39,7 +39,7 @@ class Document
         // the file property can be empty if the field is not required
         if (null === $this->getFile()) {
             return null;
-        } else if ($this->getFile()->getError() === 0){
+        } else if ($this->getFile()->getError() !== 0){
             return false;
         }
 
