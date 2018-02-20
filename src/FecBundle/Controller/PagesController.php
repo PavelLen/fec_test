@@ -10,8 +10,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class PagesController extends Controller
 {
@@ -31,26 +29,52 @@ class PagesController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
+            /**
+             * Create Document Entity
+             */
             $em = $this->getDoctrine()->getManager();
-
-            $startDate = $request->request->get('startDate');
-            $endDate = $request->request->get('endDate');
-
             $em->persist($document);
             $em->flush();
 
+            /**
+             * Date period
+             */
+            $startDate = $request->request->get('startDate');
+            empty($startDate) ? $startDate = new \DateTime("1970-01-01 00:00:00") : $startDate = new \DateTime($startDate);
+
+            $endDate = $request->request->get('endDate');
+            empty($endDate) ? $endDate = new \DateTime() : $endDate = new \DateTime($endDate);
+
             $document->upload();
 
+            /**
+             * Run parsing
+             */
             $parsing = new ParsingDocument($document->getAbsolutePath());
             $parsing = $parsing->getParsedFileData($startDate, $endDate);
 
+            /**
+             * Add parsing data to DB
+             */
             $em = $this->getDoctrine()->getManager();
-            var_dump($parsing); die();
             foreach ($parsing as $category => $groups) {
                 foreach ($groups as $group => $entry){
                     foreach ($entry as $transactions => $value){
-                        $costs = new Costs();
+
+                        $costs = $em->getRepository(Costs::class)->createQueryBuilder('c')
+                            ->where('c.costsCategory LIKE :category')
+                            ->andWhere('c.costsGroup LIKE :group')
+                            ->andWhere('c.costsEntry LIKE :entry')
+                            ->setParameter('category', '%'.$category.'%')
+                            ->setParameter('group', '%'.$group.'%')
+                            ->setParameter('entry', '%'.$transactions.'%')
+                            ->getQuery()
+                            ->getOneOrNullResult();
+
+                        if(empty($costs)){
+                            $costs = new Costs();
+                        }
+
                         $costs ->setCostsCategory($category);
                         $costs ->setCostsGroup($group);
                         $costs->setCostsEntry($transactions);
@@ -58,7 +82,15 @@ class PagesController extends Controller
 
                         if(!empty($value)){
                             foreach ($value as $date => $sum){
-                                $transaction = new Transaction();
+                                $transaction = $em->getRepository(Transaction::class)->createQueryBuilder('t')
+                                    ->where('t.date LIKE :date')
+                                    ->setParameter('date', '%'.$date.'%')
+                                    ->getQuery()
+                                    ->getOneOrNullResult();
+
+                                if (empty($transaction)){
+                                    $transaction = new Transaction();
+                                }
                                 $datetime = \DateTime::createFromFormat('Y-m-d H:i:s', $date);
                                 $transaction->setDate($datetime);
                                 $transaction->setSum($sum);

@@ -4,12 +4,16 @@ namespace FecBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Costs
  *
  * @ORM\Table(name="costs")
  * @ORM\Entity(repositoryClass="FecBundle\Repository\CostsRepository")
+ * @UniqueEntity(fields={"costs_category", "costs_group", "costs_entry"},
+ *     message="This entry is already exists."
+ * )
  */
 class Costs
 {

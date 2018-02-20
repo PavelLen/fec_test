@@ -7,21 +7,27 @@ class ParsingDocument
 {
     private $path;
 
+    /**
+     * ParsingDocument constructor.
+     * @param $path
+     */
     public function __construct($path)
     {
         $this->path = $path;
     }
 
     /**
-     * @param string $startDate
-     * @param string $endDate
+     * @param \DateTime $startDate
+     * @param \DateTime $endDate
      * @return mixed
      */
-    public function getParsedFileData($startDate = "", $endDate = "")
+    public function getParsedFileData(\DateTime $startDate, \DateTime $endDate)
     {
         $tempResult = $this->ParsingFile();
 
-        //dates for association with transaction amounts
+        /**
+         * dates for association with transaction amounts
+         */
         $dates = $tempResult[0];
 
         $tempCategoryName = '';
@@ -31,7 +37,9 @@ class ParsingDocument
         $order = [".", ",", ":", ";", "'", '"', "$", "@", "#"];
         $replace = "";
 
-        //parsing tempResult to multidimensional array(category->group->entry->transaction)
+        /**
+         * parsing tempResult to multidimensional array(category->group->entry->transaction)
+         */
         foreach ($tempResult as $arr) {
 
             //create category array
@@ -42,79 +50,66 @@ class ParsingDocument
                 $tempCategoryName = trim(str_replace($order, $replace, $arr[0]));
                 $result[$tempCategoryName] = [];
 
-                //create group array in category array
+                /**
+                 * create group array in category array
+                 */
             } elseif (substr($arr[0], -1) === "@") {
 
-                //clear temp entry name
+                /**
+                 * clear temp entry name
+                 */
                 $tempEntryName = '';
-                //assign group name
+                /**
+                 * assign group name
+                 */
                 $tempGroupName = trim(str_replace($order, $replace, $arr[0]));
                 $result[$tempCategoryName][$tempGroupName] = [];
 
-                //create entry array in group array
+                /**
+                 * create entry array in group array
+                 */
             } elseif (substr($arr[0], -1) === "#") {
-
-                $cnt = count($arr);
                 foreach ($arr as $key => $value) {
 
                     $value = trim(str_replace(",", "", $value));
 
                     if ($key === 0) {
 
-                        //if the category does not have groups, assign the group a category name
+                        /**
+                         * if the category does not have groups, assign the group a category name
+                         */
                         if (empty($tempGroupName)) {
-
                             $tempGroupName = $tempCategoryName;
-
                         }
-
-                        //assign entry name
+                        /**
+                         * assign entry name
+                         */
                         $tempEntryName = trim(str_replace($order, $replace, $value));
                         $result[$tempCategoryName][$tempGroupName][$tempEntryName] = [];
 
                     } else {
 
-                        //add transactions array (date -> sum)
+                        /**
+                         * add transactions array (date -> sum)
+                         */
                         if (!empty($value)) {
 
-                            //date from dates to normal format date
+                            /**
+                             * date from dates to normal format date
+                             */
                             $time = $this->dateFormat($dates[$key]);
 
-                            // check date period
-                            if (!empty($startDate) && !empty($endDate)) {
+                            /**
+                             * check date period
+                             */
+                            $testDate = new \DateTime($time);
+                            $period = $this->isDateBetweenDates($testDate, $startDate, $endDate);
 
-                                $testDate = new \DateTime($time);
-                                $start = new \DateTime($startDate);
-                                $end = new \DateTime($endDate);
-                                $period = $this->isDateBetweenDates($testDate, $start, $end);
-
-                            } elseif (!empty($startDate)) {
-
-                                $testDate = new \DateTime($time);
-                                $start = new \DateTime($startDate);
-                                $end = new \DateTime();
-                                $period = $this->isDateBetweenDates($testDate, $start, $end);
-
-                            } elseif (!empty($endDate)) {
-
-                                $testDate = new \DateTime($time);
-                                $start = new \DateTime("1970-01-01 00:00:00");
-                                $end = new \DateTime($endDate);
-                                $period = $this->isDateBetweenDates($testDate, $start, $end);
-
-                            } else {
-
-                                $period = '';
-                            }
-
-                            if (!empty($period)) {
-
+                            /**
+                             * add transaction
+                             */
+                            if ($period) {
                                 $result[$tempCategoryName][$tempGroupName][$tempEntryName][$time] = $value;
-
-                            } elseif ($period === 'all') {
-
-                                $result[$tempCategoryName][$tempGroupName][$tempEntryName][$time] = $value;
-
                             }
                         }
                     }
@@ -145,11 +140,11 @@ class ParsingDocument
      */
     private function ParsingFile()
     {
-        /*open file*/
         if (($document = fopen($this->path, "r")) !== false) {
-            /*read file*/
             while (($data = fgetcsv($document, ";")) !== false) {
-                // write result to array
+                /**
+                 * write result to array
+                 */
                 $tempResult[] = $data;
             }
             fclose($document);

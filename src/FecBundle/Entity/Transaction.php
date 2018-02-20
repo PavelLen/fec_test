@@ -3,12 +3,16 @@
 namespace FecBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Transactions
  *
  * @ORM\Table(name="transactions")
  * @ORM\Entity(repositoryClass="FecBundle\Repository\TransactionRepository")
+ * @UniqueEntity(fields={"date"},
+ *     message="There is already a transaction for this date."
+ * )
  */
 class Transaction
 {
